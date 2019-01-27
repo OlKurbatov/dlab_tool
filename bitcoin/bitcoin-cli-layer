@@ -1,0 +1,11 @@
+#!/bin/bash
+
+datadir="$1"
+echo "$datadir"
+
+while true; do
+printf "> "
+read command
+exec="./bitcoin-cli -regtest -datadir=$datadir $command"
+eval $exec
+done

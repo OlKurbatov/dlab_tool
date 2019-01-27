@@ -1,0 +1,71 @@
+#!/bin/bash
+core_directory="/home/meksvinz/Projects/dlab_tool"
+
+clear
+function main_menu {
+printf "1.Bitcoin\n2.Ethereum\n3.Monero\n"
+printf "Enter the number and confirm: "
+}
+
+function bitcoin_menu {
+printf "1.Start multiple nodes on the local machine\n"
+printf "Enter the number and confirm: "
+}
+
+#tab1_name tab1_command tab2_name tab2_command
+function open_terminal {
+xfce4-terminal -T $1 -e "$2" -H --tab -T $3 -e "$4" -H  
+}
+
+main_menu
+read currency
+if [ "$currency"="1" ]; then
+	if [ -d "$core_directory/bitcoin/node0" ]; then
+		rm -r $core_directory/bitcoin/node*
+	fi
+	clear
+	bitcoin_menu
+	read bitcoin_ch
+	
+	number_of_nodes=2
+	rpc_port=743
+	port=733
+	for (( i=0; i<$number_of_nodes; i++ ))
+	do
+		mkdir "$core_directory/bitcoin/node$i"
+		touch "$core_directory/bitcoin/node$i/bitcoin.conf"
+		echo [regtest] >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		echo regtest=1 >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		echo rpcuser="student$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		echo port="$port$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		echo rpcport="$rpc_port$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		for (( j=0; j<$number_of_nodes; j++ ))
+		do
+			echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		done
+		open_terminal "node_console$i" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$i/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory/bitcoin/node$i/" &
+    done                
+        while true; do
+            clear
+            printf "1.Add new node"
+            read bitcoin_sub_ch
+            if [ "$bitcoin_sub_ch"="1" ]; then
+                mkdir "$core_directory/bitcoin/node"$(($number_of_nodes))
+                touch "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		        echo [regtest] >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		        echo regtest=1 >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		        echo rpcuser="student$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		        echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		        echo port="$port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		        echo rpcport="$rpc_port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+                number_of_nodes=$(($number_of_nodes + 1))
+                for (( j=0; j<$number_of_nodes; j++ ))
+		        do
+			        echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$(($number_of_nodes - 1))/bitcoin.conf"
+		        done
+		        open_terminal "node_console$(($number_of_nodes - 1))" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$(($number_of_nodes - 1))/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory/bitcoin/node$(($number_of_nodes - 1))/" &
+            fi
+        done
+    fi
+

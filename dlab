@@ -1,6 +1,21 @@
 #!/bin/bash
 core_directory="/home/meksvinz/Projects/distlab-tool"
 
+ports_to_close=()
+trap clear_up INT
+
+function clear_up {
+printf "\n"
+for port in "${ports_to_close[@]}"
+do
+	printf "[*]Found open port $port, closing..."
+	sleep 3
+	fuser -k "$port/tcp" > /dev/null 2>&1
+	printf "Success!\n"
+done
+exit
+}
+
 clear
 function main_menu {
 printf "1.Bitcoin\n2.Ethereum\n3.Monero\n"
@@ -28,8 +43,8 @@ if [ "$currency"="1" ]; then
 	read bitcoin_ch
 	
 	number_of_nodes=2
-	rpc_port=213
-	port=223
+	rpc_port=923
+	port=933
 	for (( i=0; i<$number_of_nodes; i++ ))
 	do
 		mkdir "$core_directory/bitcoin/node$i"
@@ -45,10 +60,12 @@ if [ "$currency"="1" ]; then
 			echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
 		done
 		open_terminal "node_console$i" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$i/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$i/" &
-    done                
+    		ports_to_close+=( "$port$i" )
+		ports_to_close+=( "$rpc_port$i" )
+	done                
         while true; do
             clear
-            printf "1.Add new node"
+            printf "1.Add new node\n"
             read bitcoin_sub_ch
             if [ "$bitcoin_sub_ch"="1" ]; then
                 mkdir "$core_directory/bitcoin/node"$(($number_of_nodes))
@@ -59,13 +76,15 @@ if [ "$currency"="1" ]; then
 		        echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
 		        echo port="$port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
 		        echo rpcport="$rpc_port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-                number_of_nodes=$(($number_of_nodes + 1))
-                for (( j=0; j<$number_of_nodes; j++ ))
+                	number_of_nodes=$(($number_of_nodes + 1))
+                	for (( j=0; j<$number_of_nodes; j++ ))
 		        do
 			        echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$(($number_of_nodes - 1))/bitcoin.conf"
 		        done
 		        open_terminal "node_console$(($number_of_nodes - 1))" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$(($number_of_nodes - 1))/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$(($number_of_nodes - 1))/" &
-            fi
+            		ports_to_close+=( "$port$(($number_of_nodes - 1))" )
+	    		ports_to_close+=( "$rpc_port$(($number_of_nodes - 1))" )
+	       fi
         done
     fi
 

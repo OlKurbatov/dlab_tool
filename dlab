@@ -1,5 +1,5 @@
 #!/bin/bash
-core_directory="/home/meksvinz/Projects/dlab_tool"
+core_directory="/home/meksvinz/Projects/distlab-tool"
 
 clear
 function main_menu {
@@ -28,8 +28,8 @@ if [ "$currency"="1" ]; then
 	read bitcoin_ch
 	
 	number_of_nodes=2
-	rpc_port=743
-	port=733
+	rpc_port=213
+	port=223
 	for (( i=0; i<$number_of_nodes; i++ ))
 	do
 		mkdir "$core_directory/bitcoin/node$i"
@@ -44,7 +44,7 @@ if [ "$currency"="1" ]; then
 		do
 			echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
 		done
-		open_terminal "node_console$i" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$i/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory/bitcoin/node$i/" &
+		open_terminal "node_console$i" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$i/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$i/" &
     done                
         while true; do
             clear
@@ -64,7 +64,7 @@ if [ "$currency"="1" ]; then
 		        do
 			        echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$(($number_of_nodes - 1))/bitcoin.conf"
 		        done
-		        open_terminal "node_console$(($number_of_nodes - 1))" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$(($number_of_nodes - 1))/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory/bitcoin/node$(($number_of_nodes - 1))/" &
+		        open_terminal "node_console$(($number_of_nodes - 1))" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$(($number_of_nodes - 1))/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$(($number_of_nodes - 1))/" &
             fi
         done
     fi

@@ -2,7 +2,6 @@
 clear
 core_directory="/home/meksvinz/Projects/distlab-tool"
 git --git-dir $core_directory/.git pull
-$core_directory/logo.sh
 number_of_nodes=2
 rpc_port=923
 port=933
@@ -10,6 +9,10 @@ port=933
 
 ports_to_close=()
 trap clear_up INT
+
+function logo {
+$core_directory/logo.sh
+}
 
 function clear_up {
 printf "\n"
@@ -46,7 +49,7 @@ else
 	xfce4-terminal -T $1 -e "$2" -H
 fi
 }
-
+logo
 main_menu
 read currency
 if [ "$currency" == "1" ]; then
@@ -54,6 +57,7 @@ if [ "$currency" == "1" ]; then
 		rm -r $core_directory/bitcoin/node*
 	fi
 	clear
+	logo
 	bitcoin_menu
 	read bitcoin_ch
 	
@@ -78,6 +82,7 @@ if [ "$currency" == "1" ]; then
 	done                
         while true; do
             clear
+	    logo
             printf "1.Add new node\n"
             read bitcoin_sub_ch
             if [ "$bitcoin_sub_ch"="1" ]; then
@@ -102,11 +107,11 @@ if [ "$currency" == "1" ]; then
    fi
 fi
 if [ "$currency" == "2" ]; then
-	clear
 	if [ -d "$core_directory/ethereum/node0" ]; then
                 rm -r $core_directory/ethereum/node*
         fi
 	clear
+	logo
 	ethereum_menu
 	read ethereum_ch
 
@@ -122,6 +127,7 @@ if [ "$currency" == "2" ]; then
 	done
 	while true; do
 	clear
+	logo
 	printf "1.Add new node\n"
 	read ethereum_sub_ch
 	mkdir "$core_directory/ethereum/node$number_of_nodes"

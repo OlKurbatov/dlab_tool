@@ -1,5 +1,12 @@
 #!/bin/bash
+clear
 core_directory="/home/meksvinz/Projects/distlab-tool"
+git --git-dir $core_directory/.git pull
+$core_directory/logo.sh
+number_of_nodes=2
+rpc_port=923
+port=933
+
 
 ports_to_close=()
 trap clear_up INT
@@ -16,7 +23,6 @@ done
 exit
 }
 
-clear
 function main_menu {
 printf "1.Bitcoin\n2.Ethereum\n3.Monero\n"
 printf "Enter the number and confirm: "
@@ -27,14 +33,23 @@ printf "1.Start multiple nodes on the local machine\n"
 printf "Enter the number and confirm: "
 }
 
+function ethereum_menu {
+printf "1.Start multiple nodes on the local machine\n"
+printf "Enter the number and confirm: "
+}
+
 #tab1_name tab1_command tab2_name tab2_command
 function open_terminal {
-xfce4-terminal -T $1 -e "$2" -H --tab -T $3 -e "$4" -H  
+if [[ ! -z "$3" ]];then
+	xfce4-terminal -T $1 -e "$2" -H --tab -T $3 -e "$4" -H  
+else
+	xfce4-terminal -T $1 -e "$2" -H
+fi
 }
 
 main_menu
 read currency
-if [ "$currency"="1" ]; then
+if [ "$currency" == "1" ]; then
 	if [ -d "$core_directory/bitcoin/node0" ]; then
 		rm -r $core_directory/bitcoin/node*
 	fi
@@ -42,9 +57,7 @@ if [ "$currency"="1" ]; then
 	bitcoin_menu
 	read bitcoin_ch
 	
-	number_of_nodes=2
-	rpc_port=923
-	port=933
+	if [ "$bitcoin_ch" == "1" ]; then
 	for (( i=0; i<$number_of_nodes; i++ ))
 	do
 		mkdir "$core_directory/bitcoin/node$i"
@@ -86,5 +99,40 @@ if [ "$currency"="1" ]; then
 	    		ports_to_close+=( "$rpc_port$(($number_of_nodes - 1))" )
 	       fi
         done
-    fi
+   fi
+fi
+if [ "$currency" == "2" ]; then
+	clear
+	if [ -d "$core_directory/ethereum/node0" ]; then
+                rm -r $core_directory/ethereum/node*
+        fi
+	clear
+	ethereum_menu
+	read ethereum_ch
+
+	if [ "$ethereum_ch" == "1" ]; then
+	for (( i=0; i<$number_of_nodes; i++ ))
+	do
+		mkdir "$core_directory/ethereum/node$i"
+		$core_directory/ethereum/geth --datadir $core_directory/ethereum/node$i/ init $core_directory/ethereum/GenesisBlock.json
+		start_command="$core_directory/ethereum/geth --identity node$i --datadir $core_directory/ethereum/node$i/ --networkid 2019 --port $port$i --rpc --rpcport $rpc_port$i console"
+		open_terminal "node_console" "$start_command" &
+		ports_to_close+=( "$port$i" )
+		port_to_close+=( "$rpc_port$i" )		 
+	done
+	while true; do
+	clear
+	printf "1.Add new node\n"
+	read ethereum_sub_ch
+	mkdir "$core_directory/ethereum/node$number_of_nodes"
+                $core_directory/ethereum/geth --datadir $core_directory/ethereum/node$number_of_nodes/ init $core_directory/ethereum/GenesisBlock.json
+                start_command="$core_directory/ethereum/geth --identity node$number_of_nodes --datadir $core_directory/ethereum/node$number_of_nodes/ --networkid 2019 --port $port$number_of_nodes --rpc --rpcport $rpc_port$number_of_nodes console"
+                open_terminal "node_console" "$start_command" &
+                ports_to_close+=( "$port$number_of_nodes" )
+                port_to_close+=( "$rpc_port$number_of_nodes" )
+		number_of_nodes=$(($number_of_nodes + 1))
+	done
+
+   fi
+fi
 

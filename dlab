@@ -29,7 +29,7 @@ exit
 }
 
 function main_menu {
-printf "1.Bitcoin\n2.Ethereum\n3.Monero\n"
+printf "1.Bitcoin\n2.Ethereum\n3.Monero\n4.EOS\n"
 printf "Enter the number and confirm: "
 }
 
@@ -40,6 +40,11 @@ printf "Enter the number and confirm: "
 
 function ethereum_menu {
 printf "1.Start multiple nodes on the local machine\n"
+printf "Enter the number and confirm: "
+}
+
+function eos_menu {
+printf "1.Setup nodeos and keosd containers\n"
 printf "Enter the number and confirm: "
 }
 
@@ -143,4 +148,13 @@ if [ "$currency" == "2" ]; then
 
    fi
 fi
-
+if [ "$currency" == "4" ]; then
+	clear
+	logo
+	eos_menu
+	read eos_ch
+	if [ "$eos_ch" == "1" ]; then
+		$core_directory/eos/setup.sh
+	
+	fi
+fi

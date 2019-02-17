@@ -1,6 +1,12 @@
 import bitcoin.rpc
 import bitcoin
-from bitcoin.core import b2lx
+from bitcoin import *
+from bitcoin.core import *
+from bitcoin.core.script import *
+from bitcoin.core.scripteval import *
+from bitcoin.wallet import *
+from random import randint
+import random
 import sys, os, time, termios, tty, hashlib, signal
 
 def terminate(arg1, arg2):
@@ -29,6 +35,27 @@ class Node():
     def check_balance(self):
         balance = self.connect.getbalance()
         return balance/pow(10,8)
+
+    def build_opreturn_raw_tx(self):
+        utxos = self.connect.listunspent()
+        utxo = self.connect.listunspent()[randint(0, len(utxos))]
+        tx_input = CMutableTxIn(utxo['outpoint'])
+        tx_output = CMutableTxOut(49.9*COIN, CScript([OP_RETURN, random.getrandbits(80*8)]))
+        tx_input_pubkey = utxo['scriptPubKey']
+        priv_key = self.connect.dumpprivkey(utxo['address'])
+
+        #tx_input_pubkey = CScript([OP_DUP, OP_HASH160, Hash160(priv_key.pub), OP_EQUALVERIFY, OP_CHECKSIG])
+        #print(utxo)
+        tx = CMutableTransaction([tx_input], [tx_output])
+
+
+        hash_to_sign = SignatureHash(tx_input_pubkey, tx, 0, SIGHASH_ALL)
+        sign = priv_key.sign(hash_to_sign) + bytes([SIGHASH_ALL])
+        tx_input.scriptSig = CScript([sign])
+
+        self.connect.sendrawtransaction(tx)
+
+
 
     def send_transaction(self, address, amount=100000):
         txid = self.connect.sendtoaddress(address,amount)
@@ -76,12 +103,14 @@ for node in nodes:
     else:
         print("[*]Node {} refuse connection".format(node.rpc_user))
 
-get_revard()
+#get_revard()
 
+nodes[0].build_opreturn_raw_tx()
 while True:
     for node in nodes:
         recipients = list(nodes)
         recipients.remove(node)
         for recipients in recipients:
             time.sleep(0.33)
-            node.send_transaction(recipients.connect.getnewaddress())
+            node.build_opreturn_raw_tx()
+            print("[*]Send raw")

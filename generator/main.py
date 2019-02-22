@@ -42,7 +42,7 @@ class Node():
         utxo_balance = utxo['amount']/COIN
 #        print(utxo_balance)
         tx_input = CMutableTxIn(utxo['outpoint'])
-        tx_output1 = CMutableTxOut(amount*COIN, CScript([OP_RETURN, random.getrandbits(800*8)]))
+        tx_output1 = CMutableTxOut(amount*COIN, CScript([OP_RETURN, random.getrandbits(640)]))#80 bytes
         new_address = self.connect.getnewaddress()
         new_address_pk = self.connect.dumpprivkey(new_address)
         tx_output2 = CMutableTxOut((utxo_balance-amount-fee)*COIN,
@@ -64,15 +64,7 @@ class Node():
         if script_pk_ver == '6':
             tx_input.scriptSig = CScript([sign, priv_key.pub])
         txid = self.connect.sendrawtransaction(tx)
-        #if tx_input_pubkey.is_p2kh():
-        #    print(tx_input_pubkey)
-        #    tx_input.scriptSig = CScript([sign, priv_key.pub])
-        #    print("[*]Using p2sh")
-        #else:
-        #    tx_input.scriptSig = CScript([sign])
-        #    print("[*]Using p2pk")
-        #txid = self.connect.sendrawtransaction(tx)
-        #print(txid)
+        print(b2lx(txid))
 
 
 
@@ -122,7 +114,7 @@ for node in nodes:
     else:
         print("[*]Node {} refuse connection".format(node.rpc_user))
 
-#get_revard()
+get_revard()
 
 while True:
     for node in nodes:

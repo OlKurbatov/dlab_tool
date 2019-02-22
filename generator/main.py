@@ -36,24 +36,43 @@ class Node():
         balance = self.connect.getbalance()
         return balance/pow(10,8)
 
-    def build_opreturn_raw_tx(self):
+    def build_opreturn_raw_tx(self, amount=0.001, fee=0.0001):
         utxos = self.connect.listunspent()
-        utxo = self.connect.listunspent()[randint(0, len(utxos))]
+        utxo = self.connect.listunspent()[randint(0, len(utxos)-1)]
+        utxo_balance = utxo['amount']/COIN
+#        print(utxo_balance)
         tx_input = CMutableTxIn(utxo['outpoint'])
-        tx_output = CMutableTxOut(49.9*COIN, CScript([OP_RETURN, random.getrandbits(80*8)]))
+        tx_output1 = CMutableTxOut(amount*COIN, CScript([OP_RETURN, random.getrandbits(800*8)]))
+        new_address = self.connect.getnewaddress()
+        new_address_pk = self.connect.dumpprivkey(new_address)
+        tx_output2 = CMutableTxOut((utxo_balance-amount-fee)*COIN,
+                                   CScript([OP_DUP, OP_HASH160, Hash160(new_address_pk.pub), OP_EQUALVERIFY, OP_CHECKSIG]))
         tx_input_pubkey = utxo['scriptPubKey']
         priv_key = self.connect.dumpprivkey(utxo['address'])
 
-        #tx_input_pubkey = CScript([OP_DUP, OP_HASH160, Hash160(priv_key.pub), OP_EQUALVERIFY, OP_CHECKSIG])
-        #print(utxo)
-        tx = CMutableTransaction([tx_input], [tx_output])
-
+        tx = CMutableTransaction([tx_input], [tx_output1, tx_output2])
 
         hash_to_sign = SignatureHash(tx_input_pubkey, tx, 0, SIGHASH_ALL)
         sign = priv_key.sign(hash_to_sign) + bytes([SIGHASH_ALL])
-        tx_input.scriptSig = CScript([sign])
 
-        self.connect.sendrawtransaction(tx)
+        print(utxo)
+        print(b2lx(utxo['scriptPubKey']))
+        script_pk = b2lx(utxo['scriptPubKey'])
+        script_pk_ver = script_pk[len(script_pk)-1]
+        if script_pk_ver == '1':
+            tx_input.scriptSig = CScript([sign])
+        if script_pk_ver == '6':
+            tx_input.scriptSig = CScript([sign, priv_key.pub])
+        txid = self.connect.sendrawtransaction(tx)
+        #if tx_input_pubkey.is_p2kh():
+        #    print(tx_input_pubkey)
+        #    tx_input.scriptSig = CScript([sign, priv_key.pub])
+        #    print("[*]Using p2sh")
+        #else:
+        #    tx_input.scriptSig = CScript([sign])
+        #    print("[*]Using p2pk")
+        #txid = self.connect.sendrawtransaction(tx)
+        #print(txid)
 
 
 
@@ -67,7 +86,7 @@ def get_revard(n=1):
     print("[*]Mining...")
     while n != 0:
         n -= 1
-        for i in range(1,101):
+        for i in range(1, 101):
             for node in nodes:
                 node.connect.generate(1)
 
@@ -105,7 +124,6 @@ for node in nodes:
 
 #get_revard()
 
-nodes[0].build_opreturn_raw_tx()
 while True:
     for node in nodes:
         recipients = list(nodes)

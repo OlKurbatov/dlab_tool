@@ -19,7 +19,6 @@ tx_inputs = CMutableTxIn(COutPoint(TXID, vout_id))
 tx_outputs = CMutableTxOut(1*COIN, CScript([OP_RETURN, b'123453']))
 
 tx_inputs_scriptPubKey = CScript([OP_DUP, OP_HASH160, Hash160(priv_key.pub), OP_EQUALVERIFY, OP_CHECKSIG])
-
 tx = CMutableTransaction([tx_inputs], [tx_outputs]) #raw unssigned
 
 hash_to_sign = SignatureHash(tx_inputs_scriptPubKey, tx, 0, SIGHASH_ALL)
@@ -30,4 +29,6 @@ tx_inputs.scriptSig = CScript([signed_hash, priv_key.pub])
 
 VerifyScript(tx_inputs.scriptSig, tx_inputs_scriptPubKey, tx, 0, (SCRIPT_VERIFY_P2SH,))
 
-print(b2lx(tx.serialize()))
+#print(b2lx(tx.serialize()))
+CBitcoinAddress('1C7zdTfnkzmr13HfA2vNm5SJYRK6nEKyq8').to_scriptPubKey()
+print()

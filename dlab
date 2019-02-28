@@ -26,7 +26,7 @@ function self_update() {
         git checkout master
         git pull --force
         echo "Running the new version..."
-#        exec "$core_directory/dlab"
+        exec "$core_directory/dlab"
 
         # Now exit this old instance
         exit 1

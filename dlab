@@ -85,6 +85,8 @@ else
 	xfce4-terminal -T $1 -e "$2" -H
 fi
 }
+
+self_update
 logo
 main_menu
 read currency

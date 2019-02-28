@@ -97,7 +97,7 @@ if [ "$currency" == "1" ]; then
 	if [ -d "$core_directory/bitcoin/node0" ]; then
 		rm -r $core_directory/bitcoin/node*
 	fi
-	clear
+#	clear
 	logo
 	bitcoin_menu
 	read bitcoin_ch

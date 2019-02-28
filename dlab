@@ -39,7 +39,6 @@ $core_directory/logo.sh
 
 function clear_up {
 printf "\n"
-printf '%s\n' "${ports_to_close[@]}"
 for port in "${ports_to_close[@]}"
 do
 	printf "[*]Found open port $port, closing..."

@@ -2,7 +2,7 @@
 clear
 core_directory="$(dirname "$(readlink -f "$0")")"
 echo "[*]Look for updates..."
-git --git-dir $core_directory/.git pull
+#git --git-dir $core_directory/.git pull
 clear
 number_of_nodes=2
 #913X

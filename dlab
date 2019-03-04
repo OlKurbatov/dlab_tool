@@ -259,6 +259,6 @@ if [ "$currency" == "5" ]; then
     ipfs_menu
     read ipfs_sub_ch
     if [ "$ipfs_sub_ch" == "1" ]; then
-        open_terminal node_console "$core_directory/ipfs/ipfs daemon" cli_console "$core_directory/ipfs/ipfs-cli-layer $core_directory" &
+        open_terminal node_console "$core_directory/ipfs/ipfs daemon" cli_console "$core_directory/ipfs/ipfs-cli-layer.sh $core_directory" &
     fi
 fi

@@ -74,6 +74,10 @@ printf "1.Start multiple nodes on the local machine\n"
 printf "Enter the number and confirm: "
 }
 
+function ipfs_menu {
+printf "1.Start ipfs daemon with console\nEnter the number and confirm: "
+}
+
 #tab1_name tab1_command tab2_name tab2_command
 function open_terminal {
 if [[ ! -z "$3" ]];then
@@ -247,4 +251,10 @@ if [ "$currency" == "4" ]; then
 		$core_directory/eos/setup.sh
 	
 	fi
+fi
+
+if [ "$currency" == "5" ]; then
+    clear
+    logo
+    ipfs_menu
 fi

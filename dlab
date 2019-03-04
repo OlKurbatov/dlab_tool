@@ -12,14 +12,13 @@ rpc_port=923
 port=933
 
 
-
 ports_to_close=()
 trap clear_up INT
 
 function self_update() {
     cd $core_directory
     git fetch
-    if [ ! -z $(git diff --name-only master) ]; then
+    if [ ! -z $(git diff --name-only origin/master) ]; then
         echo "Found a new version of me, updating myself..."
         git pull --force
         git checkout master

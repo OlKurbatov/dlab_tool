@@ -50,7 +50,7 @@ exit
 }
 
 function main_menu {
-printf "1.Bitcoin\n2.Ethereum\n3.Monero\n4.EOS\n"
+printf "1.Bitcoin\n2.Ethereum\n3.Monero\n4.EOS\n5.IPFS\n"
 printf "Enter the number and confirm: "
 }
 

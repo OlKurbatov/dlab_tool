@@ -257,4 +257,8 @@ if [ "$currency" == "5" ]; then
     clear
     logo
     ipfs_menu
+    read ipfs_sub_ch
+    if [ "$ipfs_sub_ch" == "1" ]; then
+        
+    fi
 fi

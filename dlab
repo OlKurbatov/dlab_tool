@@ -259,6 +259,7 @@ if [ "$currency" == "5" ]; then
     ipfs_menu
     read ipfs_sub_ch
     if [ "$ipfs_sub_ch" == "1" ]; then
-        open_terminal node_console "$core_directory/ipfs/ipfs daemon"
+        open_terminal node_console "$core_directory/ipfs/ipfs daemon" &
+        echo "Lets go EL-P"
     fi
 fi

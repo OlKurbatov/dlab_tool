@@ -7,7 +7,7 @@ number_of_nodes=2
 #913X
 zmq_rpc_port=913
 #923X
-rpc_port=923
+rpc_port=823
 #933X
 port=933
 

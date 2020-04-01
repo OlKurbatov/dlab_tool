@@ -5,11 +5,11 @@ echo "[*]Look for updates..."
 clear
 number_of_nodes=2
 #913X
-zmq_rpc_port=913
+zmq_rpc_port=813
 #923X
 rpc_port=823
 #933X
-port=933
+port=833
 
 
 ports_to_close=()

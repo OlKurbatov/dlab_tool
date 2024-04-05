@@ -1,9 +1,9 @@
-docker pull eosio/eos-dev # pull eosio image
+docker pull eosio/eos:compile_time_chainid_boxed # pull eosio image
 docker network create eosdev # create an eos network(see docker networking)
 
 docker run --name nodeos -d -p 8888:8888 --network eosdev \
 -v /tmp/eosio/work:/work -v /tmp/eosio/data:/mnt/dev/data  \
--v /tmp/eosio/config:/mnt/dev/config -i eosio/eos-dev  \
+-v /tmp/eosio/config:/mnt/dev/config -i eosio/eos:compile_time_chainid_boxed  \
 /bin/bash -c "nodeos -e -p eosio --plugin eosio::producer_plugin \
 --plugin eosio::history_plugin --plugin eosio::chain_api_plugin \
 --plugin eosio::history_api_plugin \
@@ -16,7 +16,7 @@ docker run --name nodeos -d -p 8888:8888 --network eosdev \
 # run keosd container
 
 docker run -d --name keosd -p 9876:9876 --network eosdev \
--i eosio/eos-dev /bin/bash -c "keosd --http-server-address=0.0.0.0:9876"
+-i eosio/eos:compile_time_chainid_boxed /bin/bash -c "keosd --http-server-address=0.0.0.0:9876"
 
 # check nodeos
 
@@ -49,4 +49,4 @@ echo "Complete output: ${IPADDRESS}"
 # set alias
 
 #shopt -s expand_aliases
-alias cleos='docker exec -it nodeos /opt/eosio/bin/cleos --url http://localhost:8888 --wallet-url http://${IPADDRESS%/*}:9876'
+alias cleos='docker exec -it nodeos /usr/bin/cleos --url http://localhost:8888 --wallet-url http://${IPADDRESS%/*}:9876'

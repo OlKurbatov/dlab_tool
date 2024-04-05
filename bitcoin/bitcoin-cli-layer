@@ -1,12 +1,17 @@
 #!/bin/bash
 core_dir="$1"
-
 datadir="$2"
-echo "$datadir"
 
+echo "$datadir"
 while true; do
-printf "> "
-read command
-exec="$core_dir/bitcoin/bitcoin-cli -regtest -datadir=$datadir $command"
-eval $exec
+    printf "> "
+    read command
+
+    if [ "$command" == "exit" ]; then
+        exit
+    else
+        exec="$core_dir/bitcoin/bitcoin-cli -regtest -datadir=$datadir $command"
+        eval $exec
+    fi
 done
+

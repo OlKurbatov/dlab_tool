@@ -1,264 +1,295 @@
 #!/bin/bash
-clear
 core_directory="$(dirname "$(readlink -f "$0")")"
-echo "[*]Look for updates..."
-clear
 number_of_nodes=2
-#913X
+#813X
 zmq_rpc_port=813
-#923X
+#823X
 rpc_port=823
-#933X
+#833X
 port=833
-
 
 ports_to_close=()
 trap clear_up INT
 
-function self_update() {
-    cd $core_directory
-    git fetch
-    if [ "$(git diff --name-only origin/master)" == "dlab" ]; then
-        echo "Found a new version of me, updating myself..."
-        git pull --force
-        git checkout master
-        git pull --force
-        echo "Running the new version..."
-        exec "$core_directory/dlab"
-
-        # Now exit this old instance
-        exit 1
-    fi
-    echo "Already the latest version."
-}
-
-
 function logo {
-$core_directory/logo.sh
+    $core_directory/logo.sh
 }
 
 function clear_up {
-printf "\n"
-for port in "${ports_to_close[@]}"
-do
-	printf "[*]Found open port $port, closing..."
-	sleep 2
-	fuser -k "$port/tcp" > /dev/null 2>&1
-	printf "Success!\n"
-done
-exit
+    printf "\n"
+    for port in "${ports_to_close[@]}"
+    do
+	    printf "[*]Found open port $port, closing..."
+	    sleep 1
+	    fuser -k "$port/tcp" > /dev/null 2>&1
+	    printf "Success!\n"
+    done
+    exit
 }
 
 function main_menu {
-printf "1.Bitcoin\n2.Ethereum\n3.Monero\n4.EOS\n5.IPFS\n"
-printf "Enter the number and confirm: "
+    printf "0.Exit dlab\n1.Bitcoin\n2.Ethereum\n3.Monero\n4.EOS\n5.IPFS\n"
+    printf "Enter the number and confirm: "
+}
+
+#menu_choice
+function menu1 {
+    printf "0.Go back\n"
+    $1
+    printf "Enter the number and confirm: "
 }
 
 function bitcoin_menu {
-printf "1.Start multiple nodes on the local machine\n"
-printf "Enter the number and confirm: "
+    printf "1.Start multiple nodes on the local machine\n"
 }
 
 function ethereum_menu {
-printf "1.Start multiple nodes on the local machine\n"
-printf "Enter the number and confirm: "
+    printf "1.Start multiple nodes on the local machine\n"
 }
 
 function eos_menu {
-printf "1.Setup nodeos and keosd containers\n"
-printf "Enter the number and confirm: "
+    printf "1.Setup nodeos and keosd containers\n"
 }
 
 function monero_menu {
-printf "1.Start multiple nodes on the local machine\n"
-printf "Enter the number and confirm: "
+    printf "1.Start multiple nodes on the local machine\n"
 }
 
 function ipfs_menu {
-printf "1.Start ipfs daemon with console\nEnter the number and confirm: "
+    printf "1.Start ipfs daemon with console\n"
 }
 
 #tab1_name tab1_command tab2_name tab2_command
 function open_terminal {
 if [[ ! -z "$3" ]];then
-	xfce4-terminal -T $1 -e "$2" -H --tab -T $3 -e "$4" -H  
+    xfce4-terminal --window -T $1 -e "$2" -H --tab -T $3 -e "$4" -H
 else
-	xfce4-terminal -T $1 -e "$2" -H
+    xfce4-terminal --window -T $1 -e "$2" -H
 fi
 }
 
-self_update
-logo
-main_menu
-read currency
+while true; do
+    clear
+    logo
+    main_menu
+    read system_name
 
-#BITCOIN
+    if [ "$system_name" == "0" ]; then
+        exit
+    fi
 
-if [ "$currency" == "1" ]; then
-	if [ -d "$core_directory/bitcoin/node0" ]; then
-		rm -r $core_directory/bitcoin/node*
-	fi
-	clear
-	logo
-	bitcoin_menu
-	read bitcoin_ch
-	
-	if [ "$bitcoin_ch" == "1" ]; then
-	for (( i=0; i<$number_of_nodes; i++ ))
-	do
-		mkdir "$core_directory/bitcoin/node$i"
-		touch "$core_directory/bitcoin/node$i/bitcoin.conf"
-		echo [regtest] >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		echo regtest=1 >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		echo rpcuser="student$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		echo port="$port$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		echo rpcport="$rpc_port$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		for (( j=0; j<$number_of_nodes; j++ ))
-		do
-			echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
-		done
-		open_terminal "node_console$i" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$i/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$i/" &
-    		ports_to_close+=( "$port$i" )
-		ports_to_close+=( "$rpc_port$i" )
-	done                
-        while true; do
-            clear
+    #BITCOIN
+    if [ "$system_name" == "1" ]; then
+	    clear
 	    logo
-            printf "1.Add new node\n"
-            read bitcoin_sub_ch
-            if [ "$bitcoin_sub_ch"="1" ]; then
-                mkdir "$core_directory/bitcoin/node"$(($number_of_nodes))
-                touch "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-		        echo [regtest] >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-		        echo regtest=1 >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-		        echo rpcuser="student$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-		        echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-		        echo port="$port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
-		        echo rpcport="$rpc_port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+	    menu1 bitcoin_menu
+	    read bitcoin_ch
+	    
+	    if [ "$bitcoin_ch" == "0" ]; then
+            continue
+        fi
+
+        if [ "$bitcoin_ch" == "1" ]; then
+            if [ -d "$core_directory/bitcoin/node0" ]; then
+		        rm -r $core_directory/bitcoin/node*
+	        fi
+	        for (( i=0; i<$number_of_nodes; i++ ))
+	        do
+		        mkdir "$core_directory/bitcoin/node$i"
+		        touch "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        echo [regtest] >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        echo regtest=1 >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        echo rpcuser="student$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        echo port="$port$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        echo rpcport="$rpc_port$i" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        for (( j=0; j<$number_of_nodes; j++ ))
+		        do
+			        echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$i/bitcoin.conf"
+		        done
+		        open_terminal "node_console$i" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$i/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$i/" &
+        		ports_to_close+=( "$port$i" )
+		        ports_to_close+=( "$rpc_port$i" )
+	        done                
+            
+            while true; do
+                clear
+                logo
+                printf "0.Shutdown the deployed network and dlab\n"
+                printf "1.Add new node\n"
+                printf "If needed, enter the number and confirm: "
+                read bitcoin_sub_ch
+                
+                if [ "$bitcoin_sub_ch" == "0" ]; then
+                    clear_up
+                fi
+                
+                if [ "$bitcoin_sub_ch" == "1" ]; then
+                    mkdir "$core_directory/bitcoin/node"$(($number_of_nodes))
+                    touch "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		            echo [regtest] >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		            echo regtest=1 >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		            echo rpcuser="student$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		            echo rpcpassword="rpc" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		            echo port="$port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
+		            echo rpcport="$rpc_port$(($number_of_nodes))" >> "$core_directory/bitcoin/node$(($number_of_nodes))/bitcoin.conf"
                 	number_of_nodes=$(($number_of_nodes + 1))
                 	for (( j=0; j<$number_of_nodes; j++ ))
-		        do
-			        echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$(($number_of_nodes - 1))/bitcoin.conf"
-		        done
-		        open_terminal "node_console$(($number_of_nodes - 1))" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$(($number_of_nodes - 1))/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$(($number_of_nodes - 1))/" &
+		            do
+			            echo addnode=127.0.0.1:"$port$j" >> "$core_directory/bitcoin/node$(($number_of_nodes - 1))/bitcoin.conf"
+		            done
+		            open_terminal "node_console$(($number_of_nodes - 1))" "$core_directory/bitcoin/bitcoind -regtest -datadir=$core_directory/bitcoin/node$(($number_of_nodes - 1))/" "cli-console" "$core_directory/bitcoin/bitcoin-cli-layer $core_directory $core_directory/bitcoin/node$(($number_of_nodes - 1))/" &
             		ports_to_close+=( "$port$(($number_of_nodes - 1))" )
-	    		ports_to_close+=( "$rpc_port$(($number_of_nodes - 1))" )
-	       fi
-        done
-   fi
-fi
-
-#ETHEREUM
-
-if [ "$currency" == "2" ]; then
-	if [ -d "$core_directory/ethereum/node0" ]; then
-                rm -r $core_directory/ethereum/node*
-        fi
-	clear
-	logo
-	ethereum_menu
-	read ethereum_ch
-
-	if [ "$ethereum_ch" == "1" ]; then
-	for (( i=0; i<$number_of_nodes; i++ ))
-	do
-		mkdir "$core_directory/ethereum/node$i"
-		$core_directory/ethereum/geth --datadir $core_directory/ethereum/node$i/ init $core_directory/ethereum/GenesisBlock.json
-		start_command="$core_directory/ethereum/geth --identity node$i --datadir $core_directory/ethereum/node$i/ --networkid 2019 --port $port$i --rpc --rpcport $rpc_port$i console"
-		open_terminal "node_console" "$start_command" &
-		ports_to_close+=( "$port$i" )
-		port_to_close+=( "$rpc_port$i" )		 
-	done
-	while true; do
-	clear
-	logo
-	printf "1.Add new node\n"
-	read ethereum_sub_ch
-	mkdir "$core_directory/ethereum/node$number_of_nodes"
-                $core_directory/ethereum/geth --datadir $core_directory/ethereum/node$number_of_nodes/ init $core_directory/ethereum/GenesisBlock.json
-                start_command="$core_directory/ethereum/geth --identity node$number_of_nodes --datadir $core_directory/ethereum/node$number_of_nodes/ --networkid 2019 --port $port$number_of_nodes --rpc --rpcport $rpc_port$number_of_nodes console"
-                open_terminal "node_console" "$start_command" &
-                ports_to_close+=( "$port$number_of_nodes" )
-                port_to_close+=( "$rpc_port$number_of_nodes" )
-		number_of_nodes=$(($number_of_nodes + 1))
-	done
-
-   fi
-fi
-
-#MONERO
-
-if [ "$currency" == "3" ]; then
-    if [ -d "$core_directory/monero/node0" ]; then
-                rm -r $core_directory/monero/node*
-        fi
-	clear
-	logo
-    monero_menu
-    read monero_ch
-
-    if [ "$monero_ch" == "1" ]; then
-
-        for ((i=0; i<$number_of_nodes; i++))
-        do
-            start_command="$core_directory/monero/monerod --testnet --no-igd --allow-local-ip --data-dir $core_directory/monero/node$i --p2p-bind-ip 127.0.0.1 --log-level 0 --fixed-difficulty 100 --p2p-bind-port $port$i --rpc-bind-port $rpc_port$i --zmq-rpc-bind-port $zmq_rpc_port$i"
-            for ((j=0; j<10; j++))
-            do
-                add_nodes_string="--add-exclusive-node 127.0.0.1:$port$j"
-                start_command="$start_command $add_nodes_string"
+	        		ports_to_close+=( "$rpc_port$(($number_of_nodes - 1))" )
+	           fi
             done
-            wallet_create_command="$core_directory/monero/monero-wallet-cli --testnet --daemon-port $rpc_port$i --generate-new-wallet $core_directory/monero/node$i/walletfile.bin --password 'bit' "
-            open_terminal "node$i-console" "$start_command" "wallet$i-console" "$wallet_create_command" &
-            ports_to_close+=( "$port$i" )
-		    ports_to_close+=( "$rpc_port$i" )
-		    ports_to_close+=( "$zmq_rpc_port$i" )
-        done
-        while true; do
-            clear
-            logo
-            printf "1.Add new node\n"
-            read monero_sub_ch
-            if [ "$monero_sub_ch" == "1" ]; then
-                start_command="$core_directory/monero/monerod --testnet --no-igd --data-dir $core_directory/monero/node$number_of_nodes --p2p-bind-ip 127.0.0.1 --log-level 0 --fixed-difficulty 100 --p2p-bind-port $port$number_of_nodes --rpc-bind-port $rpc_port$number_of_nodes --zmq-rpc-bind-port $zmq_rpc_port$number_of_nodes"
-                wallet_create_command="$core_directory/monero/monero-wallet-cli --testnet --daemon-port $rpc_port$number_of_nodes --generate-new-wallet $core_directory/monero/node$number_of_nodes/walletfile.bin --password 'bit' "
-                for ((j=0; j<$number_of_nodes; j++))
+        fi
+    fi
+
+    #ETHEREUM
+    if [ "$system_name" == "2" ]; then
+	    clear
+	    logo
+	    menu1 ethereum_menu
+	    read ethereum_ch
+
+        if [ "$ethereum_ch" == "0" ]; then
+            continue
+        fi	    
+
+        if [ "$ethereum_ch" == "1" ]; then
+            if [ -d "$core_directory/ethereum/node0" ]; then
+                rm -r $core_directory/ethereum/node*
+            fi
+	    	    
+            for (( i=0; i<$number_of_nodes; i++ ))
+            do
+	            mkdir "$core_directory/ethereum/node$i"
+	            $core_directory/ethereum/geth --datadir $core_directory/ethereum/node$i/ init $core_directory/ethereum/GenesisBlock.json
+	            start_command="$core_directory/ethereum/geth --identity node$i --datadir $core_directory/ethereum/node$i/ --networkid 2019 --port $port$i --rpc --rpcport $rpc_port$i console"
+	            open_terminal "node_console" "$start_command" &
+	            ports_to_close+=( "$port$i" )
+	            ports_to_close+=( "$rpc_port$i" )		 
+            done
+	        
+            while true; do
+	            clear
+	            logo
+	            printf "0.Shutdown the deployed network and dlab\n"
+                printf "1.Add new node\n"
+                printf "If needed, enter the number and confirm: "
+	            read ethereum_sub_ch
+                
+                if [ "$ethereum_sub_ch" == "0" ]; then
+                    clear_up
+                fi
+                
+                if [ "$ethereum_sub_ch" == "1" ]; then
+                    mkdir "$core_directory/ethereum/node$number_of_nodes"
+                    $core_directory/ethereum/geth --datadir $core_directory/ethereum/node$number_of_nodes/ init $core_directory/ethereum/GenesisBlock.json
+                    start_command="$core_directory/ethereum/geth --identity node$number_of_nodes --datadir $core_directory/ethereum/node$number_of_nodes/ --networkid 2019 --port $port$number_of_nodes --rpc --rpcport $rpc_port$number_of_nodes console"
+                    open_terminal "node_console" "$start_command" &
+                    ports_to_close+=( "$port$number_of_nodes" )
+                    ports_to_close+=( "$rpc_port$number_of_nodes" )
+	                number_of_nodes=$(($number_of_nodes + 1))
+                fi
+	        done
+        fi
+    fi
+
+    #MONERO
+    if [ "$system_name" == "3" ]; then
+        clear
+	    logo
+        menu1 monero_menu
+        read monero_ch
+
+        if [ "$monero_ch" == "0" ]; then
+            continue
+        fi	    
+
+        if [ "$monero_ch" == "1" ]; then
+            if [ -d "$core_directory/monero/node0" ]; then
+                rm -r $core_directory/monero/node*
+            fi
+
+            for ((i=0; i<$number_of_nodes; i++))
+            do
+                start_command="$core_directory/monero/monerod --testnet --no-igd --allow-local-ip --data-dir $core_directory/monero/node$i --p2p-bind-ip 127.0.0.1 --log-level 0 --fixed-difficulty 100 --p2p-bind-port $port$i --rpc-bind-port $rpc_port$i --zmq-rpc-bind-port $zmq_rpc_port$i"
+                for ((j=0; j<10; j++))
                 do
                     add_nodes_string="--add-exclusive-node 127.0.0.1:$port$j"
                     start_command="$start_command $add_nodes_string"
                 done
-                add_nodes_string="--add-exclusive-node 127.0.0.1:$port$number_of_nodes"
-                start_command="$start_command $add_nodes_string"
-                ports_to_close+=( "$port$number_of_nodes" )
-		        ports_to_close+=( "$rpc_port$number_of_nodes" )
-		        ports_to_close+=( "$zmq_rpc_port$number_of_nodes" )
-                open_terminal "node$number_of_nodes-console" "$start_command" "wallet$number_of_nodes-command" "$wallet_create_command" &
-                number_of_nodes=$(($number_of_nodes + 1))
-            fi
+                wallet_create_command="$core_directory/monero/monero-wallet-cli --testnet --daemon-port $rpc_port$i --generate-new-wallet $core_directory/monero/node$i/walletfile.bin --password 'bit' "
+                open_terminal "node$i-console" "$start_command" "wallet$i-console" "$wallet_create_command" &
+                ports_to_close+=( "$port$i" )
+		        ports_to_close+=( "$rpc_port$i" )
+		        ports_to_close+=( "$zmq_rpc_port$i" )
+            done
+            
+            while true; do
+                clear
+                logo
+                printf "0.Shutdown the deployed network and dlab\n"
+                printf "1.Add new node\n"
+                printf "If needed, enter the number and confirm: "
+	            read monero_sub_ch
+                
+                if [ "$monero_sub_ch" == "0" ]; then
+                    clear_up
+                fi
 
-        done
+                if [ "$monero_sub_ch" == "1" ]; then
+                    start_command="$core_directory/monero/monerod --testnet --no-igd --data-dir $core_directory/monero/node$number_of_nodes --p2p-bind-ip 127.0.0.1 --log-level 0 --fixed-difficulty 100 --p2p-bind-port $port$number_of_nodes --rpc-bind-port $rpc_port$number_of_nodes --zmq-rpc-bind-port $zmq_rpc_port$number_of_nodes"
+                    wallet_create_command="$core_directory/monero/monero-wallet-cli --testnet --daemon-port $rpc_port$number_of_nodes --generate-new-wallet $core_directory/monero/node$number_of_nodes/walletfile.bin --password 'bit' "
+                    for ((j=0; j<$number_of_nodes; j++))
+                    do
+                        add_nodes_string="--add-exclusive-node 127.0.0.1:$port$j"
+                        start_command="$start_command $add_nodes_string"
+                    done
+                    add_nodes_string="--add-exclusive-node 127.0.0.1:$port$number_of_nodes"
+                    start_command="$start_command $add_nodes_string"
+                    ports_to_close+=( "$port$number_of_nodes" )
+		            ports_to_close+=( "$rpc_port$number_of_nodes" )
+		            ports_to_close+=( "$zmq_rpc_port$number_of_nodes" )
+                    open_terminal "node$number_of_nodes-console" "$start_command" "wallet$number_of_nodes-command" "$wallet_create_command" &
+                    number_of_nodes=$(($number_of_nodes + 1))
+                fi
+            done
+        fi
     fi
-fi
 
-#EOS
+    #EOS
+    if [ "$system_name" == "4" ]; then
+	    clear
+	    logo
+	    menu1 eos_menu
+	    read eos_ch
+	    
+        if [ "$eos_ch" == "0" ]; then
+            continue
+        fi	    
 
-if [ "$currency" == "4" ]; then
-	clear
-	logo
-	eos_menu
-	read eos_ch
-	if [ "$eos_ch" == "1" ]; then
-		$core_directory/eos/setup.sh
-	
-	fi
-fi
-
-if [ "$currency" == "5" ]; then
-    clear
-    logo
-    ipfs_menu
-    read ipfs_sub_ch
-    if [ "$ipfs_sub_ch" == "1" ]; then
-        open_terminal node_console "$core_directory/ipfs/ipfs daemon" cli_console "$core_directory/ipfs/ipfs-cli-layer.sh $core_directory" &
+        if [ "$eos_ch" == "1" ]; then
+		    $core_directory/eos/setup.sh
+	    fi
     fi
-fi
+
+    #IPFS    
+    if [ "$system_name" == "5" ]; then
+        clear
+        logo
+        menu1 ipfs_menu
+        read ipfs_sub_ch
+        
+        if [ "$ipfs_ch" == "0" ]; then
+            continue
+        fi	    
+
+        if [ "$ipfs_sub_ch" == "1" ]; then
+            open_terminal node_console "$core_directory/ipfs/ipfs daemon" cli_console "$core_directory/ipfs/ipfs-cli-layer.sh $core_directory" &
+        fi
+    fi
+done
+
